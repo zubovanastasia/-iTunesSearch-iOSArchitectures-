@@ -25,11 +25,46 @@ protocol SearchSongViewOutput: AnyObject {
 
 class SearchSongPresenter {
     weak var viewInput: (UIViewController & SearchSongViewInput)?
+    
+    let interactor: SearchSongInteractorInput
+    let router: SearchSongRouterInput
+    
     private let searchService = ITunesSearchService()
     
+    init(interactor: SearchSongInteractorInput, router: SearchSongRouterInput) {
+        self.interactor = interactor
+        self.router = router
+    }
     
-    private func requestApps(with query: String) {
-        self.searchService.getSongs(forQuery: query) { [weak self] result in
+    /*  private func requestApps(with query: String) {
+     self.searchService.getSongs(forQuery: query) { [weak self] result in
+     guard let self = self else { return }
+     self.viewInput?.throbber(show: false)
+     result
+     .withValue { songs in
+     guard !songs.isEmpty else {
+     self.viewInput?.showNoResults()
+     return
+     }
+     self.viewInput?.hideNoResults()
+     self.viewInput?.searchResults = songs
+     }
+     .withError { (error) in
+     self.viewInput?.showError(error: error)
+     }
+     }
+     }*/
+    
+    private func openSongDetails(with song: ITunesSong) {
+        let songDetailViewController = SongDetailViewController(song: song)
+        viewInput?.navigationController?.pushViewController(songDetailViewController, animated: true)
+    }
+}
+
+extension SearchSongPresenter: SearchSongViewOutput {
+    func viewDidSearch(with query: String) {
+        viewInput?.throbber(show: true)
+        interactor.requestSongs(with: query) { [weak self] in
             guard let self = self else { return }
             self.viewInput?.throbber(show: false)
             result
@@ -47,19 +82,8 @@ class SearchSongPresenter {
         }
     }
     
-    private func openSongDetails(with song: ITunesSong) {
-        let songDetailViewController = SongDetailViewController(song: song)
-        viewInput?.navigationController?.pushViewController(songDetailViewController, animated: true)
-    }
-}
-
-extension SearchSongPresenter: SearchSongViewOutput {
-    func viewDidSearch(with query: String) {
-        viewInput?.throbber(show: true)
-        requestApps(with: query)
-    }
-    
     func viewDidSelectSong(song: ITunesSong) {
         openSongDetails(with: song)
     }
 }
+

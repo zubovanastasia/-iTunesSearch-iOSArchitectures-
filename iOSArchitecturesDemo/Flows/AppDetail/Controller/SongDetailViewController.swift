@@ -43,7 +43,7 @@ final class SongDetailViewController: UIViewController {
         
         configureUI()
     }
-}
+
     // MARK: - Private
     
     private func configureUI() {
@@ -68,4 +68,5 @@ final class SongDetailViewController: UIViewController {
             headerViewController.view.rightAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.rightAnchor)
         ])
         
+}
 }
